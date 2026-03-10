@@ -4,6 +4,7 @@ import LSMI1 from './comps/LSIM1';
 import LSIM2 from './comps/LSIM2';
 import NotFound from './comps/NotFound';
 import DynamicClass from './comps/DynamicClass';
+import Istqb from './comps/Istqb';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path='/lsim1' element={<LSMI1 />}/>
         <Route path='/lsim2' element={<LSIM2 />}/>
         <Route path="/dynamic-class" element={<DynamicClass />} />
+        <Route path="/istqb" element={<Istqb />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
       

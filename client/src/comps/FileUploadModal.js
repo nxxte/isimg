@@ -3,9 +3,9 @@ import { useDropzone } from 'react-dropzone';
 import { useDispatch } from 'react-redux';
 import imageCompression from 'browser-image-compression';
 import './modal.css';
-import { getData, getData_2 } from '../redux/FileSlice';
+import { getData, getData_2, getData_lsim2_1, getData_lsim2_2 } from '../redux/FileSlice';
 
-const FileUploadModal = ({ isOpen, onClose, sem }) => {
+const FileUploadModal = ({ isOpen, onClose, sem, section }) => {
   const [files, setFiles] = useState([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -119,12 +119,18 @@ const upscaleImage = async (file, targetKB) => {
       setStatus('Uploading to cloud...');
       const formData = new FormData();
       processedFiles.forEach((file, index) => formData.append('files', file, files[index].name));
-      console.log(sem)
-      if(sem === 1){
-        await dispatch(getData({formData: formData})).unwrap();
-      }
-      else{
-        await dispatch(getData_2({formData: formData})).unwrap();
+      if (section === 'lsim2') {
+        if (sem === 1) {
+          await dispatch(getData_lsim2_1({ formData })).unwrap();
+        } else {
+          await dispatch(getData_lsim2_2({ formData })).unwrap();
+        }
+      } else {
+        if (sem === 1) {
+          await dispatch(getData({ formData })).unwrap();
+        } else {
+          await dispatch(getData_2({ formData })).unwrap();
+        }
       }
 
       setStatus('AI analysis...');

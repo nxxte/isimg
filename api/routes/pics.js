@@ -1,22 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const OpenAi = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { ObjectId } = require('mongodb');
 const multer = require('multer');
 const { Readable } = require('stream');
 const storage = multer.memoryStorage();
-const upload = multer({ storage });  
+const upload = multer({ storage });
 const pdf = require('pdf-parse-new');
 
-
-
-const client = new OpenAi({
-    baseURL: process.env.BASE_URL,
-    apiKey: process.env.OPENROUTER_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 const PROMPT = process.env.PROMPT;
 const PROMPT_2 = process.env.PROMPT_2;
+const PROMPT_LSIM2_1 = process.env.PROMPT_LSIM2_1;
+const PROMPT_LSIM2_2 = process.env.PROMPT_LSIM2_2;
 const BACK = process.env.BACK;
   
 
@@ -86,6 +83,68 @@ module.exports = (db, bucket) => {
             const data = await GetData(urls, 2);
             res.status(200).send({ ai: data });
     
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    });
+
+    // lsim 2 screenshot sem1
+    router.post('/data/lsim2', upload.array('files'), async (req, res) => {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: "No files uploaded" });
+        }
+
+        try {
+            const uploadPromises = req.files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const readableStream = Readable.from(file.buffer);
+                    const uploadStream = bucket.openUploadStream(file.originalname);
+                    readableStream.pipe(uploadStream)
+                        .on('error', reject)
+                        .on('finish', () => resolve(uploadStream));
+                });
+            });
+
+            const uploadStreams = await Promise.all(uploadPromises);
+            const urls = uploadStreams.map(us =>
+                `https://isimg-pre-back.vercel.app/api/inspect/${us.id}`
+            );
+
+            const data = await GetData(urls, 3);
+            res.status(200).send({ ai: data });
+
+        } catch (error) {
+            console.error('Error:', error);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    });
+
+    // lsim 2 screenshot sem2
+    router.post('/data/lsim2/sem', upload.array('files'), async (req, res) => {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: "No files uploaded" });
+        }
+
+        try {
+            const uploadPromises = req.files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const readableStream = Readable.from(file.buffer);
+                    const uploadStream = bucket.openUploadStream(file.originalname);
+                    readableStream.pipe(uploadStream)
+                        .on('error', reject)
+                        .on('finish', () => resolve(uploadStream));
+                });
+            });
+
+            const uploadStreams = await Promise.all(uploadPromises);
+            const urls = uploadStreams.map(us =>
+                `https://isimg-pre-back.vercel.app/api/inspect/${us.id}`
+            );
+
+            const data = await GetData(urls, 4);
+            res.status(200).send({ ai: data });
+
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({ error: "Internal server error" });
@@ -330,41 +389,29 @@ module.exports = (db, bucket) => {
 
 async function GetData(urls, sem) {
     try {
-        const userInput = `extract data | ${urls.join(' | ')}`;
+        const promptMap = { 1: PROMPT, 2: PROMPT_2, 3: PROMPT_LSIM2_1, 4: PROMPT_LSIM2_2 };
+        const systemInstruction = promptMap[sem] || PROMPT;
 
-        const messages = [{
-            role: "system",
-            content: sem === 1 ? PROMPT : PROMPT_2
-        }];
-
-        if (userInput.includes('|')) {
-            const parts = userInput.split('|').map(p => p.trim());
-            const textPart = parts[0];
-            const urlParts = parts.slice(1);
-
-            const content = [
-                { type: "text", text: textPart }
-            ];
-
-            for (const url of urlParts) {
-                content.push({ 
-                    type: "image_url", 
-                    image_url: { url } 
-                });
-            }
-
-            messages.push({
-                role: "user",
-                content: content
-            });
-        }
-
-        const completion = await client.chat.completions.create({
-            model: process.env.MODEL,
-            messages: messages
+        const model = genAI.getGenerativeModel({
+            model: process.env.GOOGLE_MODEL,
+            systemInstruction
         });
 
-        const aiResponse = completion.choices[0].message.content;
+        // Fetch each image and convert to inline base64 for Gemini
+        const imageParts = await Promise.all(urls.map(async (url) => {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            const base64 = Buffer.from(arrayBuffer).toString('base64');
+            const mimeType = response.headers.get('content-type') || 'image/jpeg';
+            return { inlineData: { data: base64, mimeType } };
+        }));
+
+        const result = await model.generateContent([
+            { text: 'extract data' },
+            ...imageParts
+        ]);
+
+        const aiResponse = result.response.text();
         const finalResponse = aiResponse.replace(/```json|```/g, '');
         console.log(finalResponse);
         return finalResponse;
@@ -377,10 +424,7 @@ async function GetData(urls, sem) {
 
 
 async function GetPdfDataAny(pdfText) {
-    const messages = [
-        {
-            role: "system",
-            content: `You are a precise data extraction assistant. Extract academic subject information from the provided PDF text and return it in a clean JSON format.
+    const systemInstruction = `You are a precise data extraction assistant. Extract academic subject information from the provided PDF text and return it in a clean JSON format.
 
 IMPORTANT RULES:
 1. Extract subjects organized by semester (sem1, sem2)
@@ -398,9 +442,9 @@ IMPORTANT RULES:
 5. Extract Filière (field of study) and Niveau (level/year)
 6. Return ONLY valid JSON - no markdown, no code blocks, no backticks, no \\n characters
 7. Be accurate with the semester assignment - verify which semester each subject belongs to
-8 - Do not assume fixed values for "cs" — always extract the actual number from the text (e.g. Ex (0.5) → "cs": 0.5).
-9 - If the same exam type appears more than once for a subject (e.g., two DS entries), label them sequentially as "DS" and "DS2", "TP" and "TP2", etc. 
-10 - Ignore unit titles:
+8. Do not assume fixed values for "cs" — always extract the actual number from the text (e.g. Ex (0.5) → "cs": 0.5).
+9. If the same exam type appears more than once for a subject (e.g., two DS entries), label them sequentially as "DS" and "DS2", "TP" and "TP2", etc.
+10. Ignore unit titles:
     - Lines or boxes like "Mathématiques 1 – Crédits = 5" or "Systèmes Embarqués – Crédits = 8" represent unit headers (unité d'enseignement), not subjects.
     - Do not include them in the JSON output.
 
@@ -421,23 +465,19 @@ Expected JSON structure:
     }
   ],
   "sem2": []
-}`
-        },
-        {
-            role: "user",
-            content: [
-                { type: "text", text: "Extract the subjects based on their semester from this PDF" },
-                { type: "text", text: pdfText }
-            ]
-        }
-    ];
+}`;
 
-    const completion = await client.chat.completions.create({
-        model: process.env.MODEL,
-        messages: messages
+    const model = genAI.getGenerativeModel({
+        model: process.env.GOOGLE_MODEL,
+        systemInstruction
     });
 
-    const aiResponse = completion.choices[0].message.content;
+    const result = await model.generateContent([
+        { text: 'Extract the subjects based on their semester from this PDF' },
+        { text: pdfText }
+    ]);
+
+    const aiResponse = result.response.text();
     const finalResponse = aiResponse.replace(/```json|```/g, '');
     console.log(finalResponse);
     return finalResponse;

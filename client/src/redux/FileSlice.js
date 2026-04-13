@@ -68,6 +68,30 @@ export const getDataPdfLSIM2 = createAsyncThunk('data/pdflisim2', async ({formDa
 });
 
 
+export const getData_lsim2_1 = createAsyncThunk('data/lsim2/sem1', async ({formData}, { rejectWithValue }) => {
+  try {
+    const result = await axios.post(`https://isimg-pre-back.vercel.app/api/data/lsim2`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return result.data;
+  } catch (error) {
+    console.error('Axios Error:', error.response?.data);
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+export const getData_lsim2_2 = createAsyncThunk('data/lsim2/sem2', async ({formData}, { rejectWithValue }) => {
+  try {
+    const result = await axios.post(`https://isimg-pre-back.vercel.app/api/data/lsim2/sem`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return result.data;
+  } catch (error) {
+    console.error('Axios Error:', error.response?.data);
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
 export const getDataPdfAny = createAsyncThunk('data/pdfany', async ({formData}, { rejectWithValue }) => {
   try {
     const result = await axios.post(`https://isimg-pre-back.onrender.com/api/data/pdf/any`, formData, {
@@ -109,6 +133,14 @@ export const FileSlice = createSlice({
         .addCase(getDataPdfAny.fulfilled, (state, action) => {
           state.data = action.payload.pdf;
           localStorage.setItem("any", action.payload.pdf);
+        })
+        .addCase(getData_lsim2_1.fulfilled, (state, action) => {
+          state.data = action.payload.ai;
+          localStorage.setItem("lsim2", action.payload.ai);
+        })
+        .addCase(getData_lsim2_2.fulfilled, (state, action) => {
+          state.data = action.payload.ai;
+          localStorage.setItem("lsim2", action.payload.ai);
         })
 
     }

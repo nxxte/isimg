@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import './lsim1.css';
 import FileUploadModal from './FileUploadModal';
 import PdfFileUpload from './PdfFileUpload';
@@ -9,6 +10,7 @@ import Credits from './Credits';
 import Swal from 'sweetalert2';
 
 const LSIM1 = () => {
+  const navigate = useNavigate();
   const [activeSemester, setActiveSemester] = useState('sem1');
 
   const getInitialState = (key, defaultState) => {
@@ -238,6 +240,9 @@ const LSIM1 = () => {
   return (
     <div className="container">
       <header>
+        <button className="back-btn" onClick={() => navigate('/')}>
+          ← Accueil
+        </button>
         <div className="silk-container">
           <Beams
             beamWidth={3}
@@ -249,91 +254,51 @@ const LSIM1 = () => {
             scale={0.2}
             rotation={30}
           />
-      </div>
+        </div>
         <h1>LSIM 1</h1>
         <div className="switch-container">
           <button
-          style={{border: "1px solid #6c5ce7"}}
+            style={{border: "1px solid #6c5ce7"}}
             className={activeSemester === 'sem1' ? 'active' : ''}
             onClick={() => setActiveSemester('sem1')}
           >
             1er Semestre
           </button>
           <button
-          style={{border: "1px solid #6c5ce7"}}
+            style={{border: "1px solid #6c5ce7"}}
             className={activeSemester === 'sem2' ? 'active' : ''}
             onClick={() => setActiveSemester('sem2')}
           >
             2ème Semestre
           </button>
         </div>
-        <>
-            <button 
-              style={{marginTop: '30px'}}              
-              className="btn-new"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <span>Upload Screenshot (BETA)</span>     
-            </button>            
-          </>
-        <br />
-        <div className='pdf-container'>
-          <button 
+        <div className="header-actions">
+          <button
+            className="btn-new"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <span>Upload Screenshot (BETA)</span>
+          </button>
+          <button
             className="btn-new"
             onClick={() => setIsOpenPdf(true)}
           >
             <span>Upload PDF</span>
-          </button> 
+          </button>
           <button
             className="pdf-info"
             onClick={() => setShowPdfInfo(true)}
           >
             ?
-          </button> 
+          </button>
         </div>
 
-        <FileUploadModal 
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}  
-            sem={activeSemester === "sem1" ? 1 : 2}  
-            section={"lsim2"}
-        />
-        <PdfFileUpload 
-          isOpen={isOpenPdf}
-          onClose={() => setIsOpenPdf(false)}
-          sem={activeSemester === "sem1" ? 1 : 2}
-          section={"lsim2"}
-         />
-         <PdfInfoModal 
-          isOpen={showPdfInfo} 
-          onClose={() => setShowPdfInfo(false)}          
-        />
-
-          {error && (
-              <div className="error-banner">
-                ⚠️ Error: {error}
-                <button onClick={() => setError(null)}>Dismiss</button>
-              </div>
-          )}
-        
       </header>
 
-            <div style={{display: 'flex',
-                justifyContent: 'end'}}>
-        <button 
-              style={{
-                marginTop: '30px', 
-                backgroundColor: 'transparent', 
-                border: '2px solid #dc3545', 
-                color: '#dc3545',
-                marginBottom: "30px",
-
-              }}
-              className=""
-              onClick={handleReset}
-            >
-              <span>Reset</span>     
-          </button>
+      <div className="reset-row">
+        <button className="btn-reset" onClick={handleReset}>
+          Reset
+        </button>
       </div>
       
       {activeSemester === 'sem1' && (
@@ -1160,8 +1125,31 @@ const LSIM1 = () => {
         <div id="final-overall">{format(finalOverall)}</div>
       </fieldset>
       <Credits />
+
+      <FileUploadModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        sem={activeSemester === "sem1" ? 1 : 2}
+        section={"lsim1"}
+      />
+      <PdfFileUpload
+        isOpen={isOpenPdf}
+        onClose={() => setIsOpenPdf(false)}
+        sem={activeSemester === "sem1" ? 1 : 2}
+        section={"lsim1"}
+      />
+      <PdfInfoModal
+        isOpen={showPdfInfo}
+        onClose={() => setShowPdfInfo(false)}
+      />
+      {error && (
+        <div className="error-banner">
+          ⚠️ Error: {error}
+          <button onClick={() => setError(null)}>Dismiss</button>
+        </div>
+      )}
     </div>
-    
+
   );
 
 };

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './lsim1.css';
 import Credits from './Credits';
 import Beams from './Backgrounds/Beams';
-import Swal from 'sweetalert2'; // Import SweetAlert2
+import Swal from 'sweetalert2';
 
 import FileUploadModal from './FileUploadModal';
 import PdfFileUpload from './PdfFileUpload';
@@ -10,6 +11,7 @@ import PdfInfoModal from './PdfInfoModal';
 import { useSelector } from 'react-redux';
 
 const LSIM2 = () => {
+  const navigate = useNavigate();
   const [activeSemester, setActiveSemester] = useState('sem1');
   
   const getInitialState = (key, defaultState) => {
@@ -294,8 +296,11 @@ const LSIM2 = () => {
   return (
     <>
     <div className="container">
-      
+
       <header>
+        <button className="back-btn" onClick={() => navigate('/')}>
+          ← Accueil
+        </button>
         <div className="silk-container">
           <Beams
             beamWidth={3}
@@ -326,65 +331,34 @@ const LSIM2 = () => {
           </button>
         </div>
         
-        <br />
-        <div className='pdf-container'>
-          <button 
+        <div className="header-actions">
+          <button
+            className="btn-new"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <span>Upload Screenshot (BETA)</span>
+          </button>
+          <button
             className="btn-new"
             onClick={() => setIsOpenPdf(true)}
           >
             <span>Upload PDF</span>
-          </button> 
+          </button>
           <button
             className="pdf-info"
             onClick={() => setShowPdfInfo(true)}
           >
             ?
-          </button> 
+          </button>
         </div>
 
         
 
-        <FileUploadModal 
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}  
-            sem={activeSemester === "sem1" ? 1 : 2}
-            section={"lsim2"}
-        />
-        <PdfFileUpload 
-          isOpen={isOpenPdf}
-          onClose={() => setIsOpenPdf(false)}
-          sem={activeSemester === "sem1" ? 1 : 2}
-          section={"lsim2"}
-          />
-        <PdfInfoModal 
-          isOpen={showPdfInfo} 
-          onClose={() => setShowPdfInfo(false)}          
-        />
-
-          {error && (
-              <div className="error-banner">
-                ⚠️ Error: {error}
-                <button onClick={() => setError(null)}>Dismiss</button>
-              </div>
-          )}
-        
       </header>
-      <div style={{display: 'flex',
-                justifyContent: 'end'}}>
-        <button 
-              style={{
-                marginTop: '30px', 
-                backgroundColor: 'transparent', 
-                border: '2px solid #dc3545', 
-                color: '#dc3545',
-                marginBottom: "30px",
-
-              }}
-              className=""
-              onClick={handleReset}
-            >
-              <span>Reset</span>     
-          </button>
+      <div className="reset-row">
+        <button className="btn-reset" onClick={handleReset}>
+          Reset
+        </button>
       </div>
 
 
@@ -561,6 +535,29 @@ const LSIM2 = () => {
       </fieldset>
 
       <Credits />
+
+      <FileUploadModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        sem={activeSemester === "sem1" ? 1 : 2}
+        section={"lsim2"}
+      />
+      <PdfFileUpload
+        isOpen={isOpenPdf}
+        onClose={() => setIsOpenPdf(false)}
+        sem={activeSemester === "sem1" ? 1 : 2}
+        section={"lsim2"}
+      />
+      <PdfInfoModal
+        isOpen={showPdfInfo}
+        onClose={() => setShowPdfInfo(false)}
+      />
+      {error && (
+        <div className="error-banner">
+          ⚠️ Error: {error}
+          <button onClick={() => setError(null)}>Dismiss</button>
+        </div>
+      )}
     </div>
     </>
   );

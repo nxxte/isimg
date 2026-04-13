@@ -10,6 +10,15 @@ def download_pdf_from_url(url):
     response.raise_for_status()
     return BytesIO(response.content)
 
+def safe_float(val):
+    """Convert a cell value to float, returning 0 for empty/absent/invalid values."""
+    if val is None or val == '':
+        return 0
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return 0
+
 @app.route('/', methods=['GET'])
 def hello():
     return "Working"
@@ -61,22 +70,22 @@ def extract_grades():
                             for i in range(len(row)):
                                 if row[i] in ['DS (0.3)', 'DS\n(0.15)', 'DS (0.4)', 'DS (0.15)']:
                                     break
-                            dss.append(0 if row[i+1] == '' else float(row[i+1]))
+                            dss.append(safe_float(row[i+1]))
                         elif 'Ex (0.7)' in row:
                             for i in range(len(row)):
                                 if row[i] == 'Ex (0.7)':
                                     break
-                            ex.append(0 if row[i+1] == '' else float(row[i+1]))
+                            ex.append(safe_float(row[i+1]))
                         elif ('TP\n(0.15)' in row or 'TP (0.2)' in row or 'TP (0.15)' in row):
                             for i in range(len(row)):
                                 if row[i] in ['TP\n(0.15)', 'TP (0.2)', 'TP (0.15)']:
                                     break
-                            tp.append(0 if row[i+1] == '' else float(row[i+1]))
+                            tp.append(safe_float(row[i+1]))
                         elif ('Oral\n(0.2)' in row or 'Oral (0.2)' in row):
                             for i in range(len(row)):
                                 if row[i] in ['Oral\n(0.2)', 'Oral (0.2)']:
                                     break
-                            oral.append(0 if row[i+1] == '' else float(row[i+1]))
+                            oral.append(safe_float(row[i+1]))
 
             a = 0
             b = 0
@@ -202,22 +211,22 @@ def extract_grades_2():
                             for i in range(len(row)):
                                 if row[i] in ['DS (0.3)', 'DS\n(0.15)', 'DS (0.4)', 'DS (0.15)']:
                                     break
-                            dss.append(0 if row[i+1] == '' else float(row[i+1]))
+                            dss.append(safe_float(row[i+1]))
                         elif 'Ex (0.7)' in row:
                             for i in range(len(row)):
                                 if row[i] == 'Ex (0.7)':
                                     break
-                            ex.append(0 if row[i+1] == '' else float(row[i+1]))
+                            ex.append(safe_float(row[i+1]))
                         elif ('TP\n(0.15)' in row or 'TP (0.2)' in row or 'TP (0.15)' in row):
                             for i in range(len(row)):
                                 if row[i] in ['TP\n(0.15)', 'TP (0.2)', 'TP (0.15)']:
                                     break
-                            tp.append(0 if row[i+1] == '' else float(row[i+1]))
+                            tp.append(safe_float(row[i+1]))
                         elif ('Oral\n(0.2)' in row or 'Oral (0.2)' in row):
                             for i in range(len(row)):
                                 if row[i] in ['Oral\n(0.2)', 'Oral (0.2)']:
                                     break
-                            oral.append(0 if row[i+1] == '' else float(row[i+1]))
+                            oral.append(safe_float(row[i+1]))
 
             a = 0
             b = 0
@@ -284,11 +293,6 @@ def extract_grades_2():
             { 'subject': 'web3', 'web3ds': grades["web3"]["DS"], 'web3tp': grades["web3"]["TP"], 'web3ex': grades["web3"]["Ex"] },
             { 'subject': 'cross', 'crossds': grades["cross"]["DS"], 'crosstp': grades["cross"]["TP"], 'crossex': grades["cross"]["Ex"] }
         ]
-        data2 = [
-
-        ]
-
-        final_data = data if sem == "1" else data2
         return jsonify(data)
 
     except requests.RequestException as e:

@@ -44,25 +44,29 @@ function Home() {
       <div className="container-home">
         <div className="content">
           <h1 className="title">ISIMG</h1>
+         
           <div className="button-container">
-            <a className="nav-button" onClick={() => navigate("/lsim1")}>
-              LSIM 1
+            <a className="nav-button btn-anim-1" onClick={() => navigate("/lsim1")}>
+              <span className="nav-btn-label">LSIM 1</span>
+              <span className="nav-btn-desc">1ère année · 2 semestres</span>
             </a>
-            <a className="nav-button" onClick={() => navigate("/lsim2")}>
-              LSIM 2
+            <a className="nav-button btn-anim-2" onClick={() => navigate("/lsim2")}>
+              <span className="nav-btn-label">LSIM 2</span>
+              <span className="nav-btn-desc">2ème année · 2 semestres</span>
             </a>
-            
-            <hr className="nav-separator" />
 
-            <a 
+            <div className="nav-divider">
+              <span className="nav-divider-label">Bêta</span>
+            </div>
+
+            <a
               onClick={() => handleNavigate("/dynamic-class")}
-              className={`nav-button ${isFilierePersonnaliseeDisabled ? 'disabled' : ''}`}
+              className={`nav-button nav-button-beta btn-anim-3 ${isFilierePersonnaliseeDisabled ? 'disabled' : ''}`}
               href={isFilierePersonnaliseeDisabled ? '#' : '/dynamic-class'}
             >
-              Filière Personnalisée (BETA)
+              <span className="nav-btn-label">Filière Personnalisée</span>
+              <span className="nav-btn-desc">Configurez votre propre filière</span>
             </a>
-            <hr className="nav-separator" />
-
           </div>
           <a
             href="https://github.com/nxxte/isimg"

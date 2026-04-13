@@ -55,6 +55,43 @@ body {
   }
 }
 
+@keyframes headerSlideDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes titleShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 4px 15px rgba(0,0,0,0.1), 0 0 0 1px rgba(108,92,231,0.15); }
+  50%       { box-shadow: 0 4px 20px rgba(108,92,231,0.25), 0 0 0 1px rgba(108,92,231,0.4); }
+}
+
+@keyframes finalGlowPulse {
+  0%, 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 1px rgba(108,92,231,0.3); }
+  50%       { box-shadow: 0 8px 35px rgba(108,92,231,0.45), 0 0 0 1px rgba(108,92,231,0.7); }
+}
+
+@keyframes numberPop {
+  0%   { transform: scale(0.85); opacity: 0; }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes activeTabPop {
+  0%   { transform: scale(0.92); }
+  60%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fieldsetReveal {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
 header {
   text-align: center;
   margin-bottom: 2rem;
@@ -65,6 +102,7 @@ header {
   position: relative;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: headerSlideDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 header::before {
@@ -94,11 +132,16 @@ header::before {
 h1 {
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
-  color: var(--text);
   font-weight: 800;
   letter-spacing: -0.5px;
   position: relative;
   display: inline-block;
+  background: linear-gradient(90deg, #ffffff 0%, #c4b8ff 20%, #8c7ff7 40%, #6c5ce7 50%, #8c7ff7 60%, #c4b8ff 80%, #ffffff 100%);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleShimmer 5s linear infinite;
 }
 
 h1::after {
@@ -106,7 +149,9 @@ h1::after {
   position: absolute;
   width: 60px;
   height: 4px;
-  background: var(--primary);
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary-light));
+  background-size: 200% 200%;
+  animation: gradient 4s ease infinite;
   bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
@@ -140,6 +185,7 @@ button.active {
   background-color: var(--primary);
   color: white;
   box-shadow: 0 6px 15px rgba(108, 92, 231, 0.3);
+  animation: activeTabPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 button:hover:not(.active) {
@@ -172,6 +218,13 @@ button:hover::before {
   margin-bottom: 2rem;
   animation: slideUp 0.5s ease-out;
 }
+
+.form-container > fieldset:nth-child(1) { animation: fieldsetReveal 0.5s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.form-container > fieldset:nth-child(2) { animation: fieldsetReveal 0.5s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.form-container > fieldset:nth-child(3) { animation: fieldsetReveal 0.5s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.form-container > fieldset:nth-child(4) { animation: fieldsetReveal 0.5s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.form-container > fieldset:nth-child(5) { animation: fieldsetReveal 0.5s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.form-container > fieldset:nth-child(6) { animation: fieldsetReveal 0.5s 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 
 @keyframes slideUp {
   from {
@@ -237,6 +290,7 @@ input[type="number"]:focus {
   text-align: center;
   position: relative;
   overflow: hidden;
+  animation: glowPulse 3s ease-in-out infinite;
 }
 
 .fieldset-result::before {
@@ -271,6 +325,7 @@ input[type="number"]:focus {
   padding: 2rem;
   position: relative;
   overflow: hidden;
+  animation: finalGlowPulse 2.5s ease-in-out infinite;
 }
 
 .fieldset-final::before {
@@ -298,6 +353,7 @@ input[type="number"]:focus {
   z-index: 1;
   text-shadow: 0 2px 10px rgba(108, 92, 231, 0.3);
   transition: transform 0.3s ease, text-shadow 0.3s ease;
+  animation: numberPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 #final-overall:hover {
@@ -530,6 +586,66 @@ p input {
   margin-top: 1rem;
 }
 
+.back-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary);
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  z-index: 10;
+  text-decoration: none;
+  font-family: "Inter", sans-serif;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateX(-2px);
+}
+
+.btn-reset {
+  background: transparent;
+  border: 1.5px solid var(--danger);
+  color: var(--danger);
+  padding: 0.55rem 1.4rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: "Inter", sans-serif;
+}
+
+.btn-reset:hover {
+  background: rgba(255, 118, 117, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 118, 117, 0.15);
+}
+
+.reset-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1.25rem 0 0.5rem 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
 .pdf-info {
   width: 50px;
   height: 50px;
@@ -564,6 +680,13 @@ p input {
     padding: 1rem;
   }
 
+  .back-btn {
+    top: 0.75rem;
+    left: 0.75rem;
+    font-size: 0.78rem;
+    padding: 0.4rem 0.75rem;
+  }
+
   header {
     padding: 1.5rem 1rem;
     border-radius: var(--border-radius-sm);
@@ -571,6 +694,7 @@ p input {
 
   h1 {
     font-size: 2rem;
+    background-size: 250% auto;
   }
 
   .form-container {

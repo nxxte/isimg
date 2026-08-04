@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { ObjectId } = require('mongodb');
 const multer = require('multer');
-const { Readable } = require('stream');
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-const pdf = require('pdf-parse-new');
+const { uploadToB2, deleteFromB2 } = require('../b2_client');
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
@@ -15,9 +13,9 @@ const PROMPT_2 = process.env.PROMPT_2;
 const PROMPT_LSIM2_1 = process.env.PROMPT_LSIM2_1;
 const PROMPT_LSIM2_2 = process.env.PROMPT_LSIM2_2;
 const BACK = process.env.BACK;
-  
 
-module.exports = (db, bucket) => {
+
+module.exports = () => {
 
     router.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', '*');
@@ -25,67 +23,50 @@ module.exports = (db, bucket) => {
         next();
     });
 
-    router.post('/data', upload.array('files'), async (req, res) => {    
+    router.post('/data', upload.array('files'), async (req, res) => {
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ error: "No files uploaded" });
         }
-        
-        try {    
-            const uploadPromises = req.files.map(file => {
-                return new Promise((resolve, reject) => {
-                    const readableStream = Readable.from(file.buffer);
-                    const uploadStream = bucket.openUploadStream(file.originalname);
-    
-                    readableStream.pipe(uploadStream)
-                        .on('error', reject)
-                        .on('finish', () => resolve(uploadStream));
-                });
-            });
 
+        let uploads = [];
+        try {
             console.log("uploading");
-    
-            const uploadStreams = await Promise.all(uploadPromises);
-            const urls = uploadStreams.map(us => 
-                `https://isimg-pre-back.vercel.app/api/inspect/${us.id}`
+            uploads = await Promise.all(
+                req.files.map(file => uploadToB2(file.buffer, file.originalname, file.mimetype))
             );
-    
+            const urls = uploads.map(u => u.url);
+
             const data = await GetData(urls, 1);
             res.status(200).send({ ai: data });
-    
+
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({ error: "Internal server error" });
+        } finally {
+            await cleanupUploads(uploads);
         }
     });
 
-    router.post('/data/sem', upload.array('files'), async (req, res) => {    
+    router.post('/data/sem', upload.array('files'), async (req, res) => {
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ error: "No files uploaded" });
-        }       
-        
-        try {    
-            const uploadPromises = req.files.map(file => {
-                return new Promise((resolve, reject) => {
-                    const readableStream = Readable.from(file.buffer);
-                    const uploadStream = bucket.openUploadStream(file.originalname);
-    
-                    readableStream.pipe(uploadStream)
-                        .on('error', reject)
-                        .on('finish', () => resolve(uploadStream));
-                });
-            });
-    
-            const uploadStreams = await Promise.all(uploadPromises);
-            const urls = uploadStreams.map(us => 
-                `https://isimg-pre-back.vercel.app/api/inspect/${us.id}`
+        }
+
+        let uploads = [];
+        try {
+            uploads = await Promise.all(
+                req.files.map(file => uploadToB2(file.buffer, file.originalname, file.mimetype))
             );
-    
+            const urls = uploads.map(u => u.url);
+
             const data = await GetData(urls, 2);
             res.status(200).send({ ai: data });
-    
+
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({ error: "Internal server error" });
+        } finally {
+            await cleanupUploads(uploads);
         }
     });
 
@@ -95,21 +76,12 @@ module.exports = (db, bucket) => {
             return res.status(400).json({ error: "No files uploaded" });
         }
 
+        let uploads = [];
         try {
-            const uploadPromises = req.files.map(file => {
-                return new Promise((resolve, reject) => {
-                    const readableStream = Readable.from(file.buffer);
-                    const uploadStream = bucket.openUploadStream(file.originalname);
-                    readableStream.pipe(uploadStream)
-                        .on('error', reject)
-                        .on('finish', () => resolve(uploadStream));
-                });
-            });
-
-            const uploadStreams = await Promise.all(uploadPromises);
-            const urls = uploadStreams.map(us =>
-                `https://isimg-pre-back.vercel.app/api/inspect/${us.id}`
+            uploads = await Promise.all(
+                req.files.map(file => uploadToB2(file.buffer, file.originalname, file.mimetype))
             );
+            const urls = uploads.map(u => u.url);
 
             const data = await GetData(urls, 3);
             res.status(200).send({ ai: data });
@@ -117,6 +89,8 @@ module.exports = (db, bucket) => {
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({ error: "Internal server error" });
+        } finally {
+            await cleanupUploads(uploads);
         }
     });
 
@@ -126,21 +100,12 @@ module.exports = (db, bucket) => {
             return res.status(400).json({ error: "No files uploaded" });
         }
 
+        let uploads = [];
         try {
-            const uploadPromises = req.files.map(file => {
-                return new Promise((resolve, reject) => {
-                    const readableStream = Readable.from(file.buffer);
-                    const uploadStream = bucket.openUploadStream(file.originalname);
-                    readableStream.pipe(uploadStream)
-                        .on('error', reject)
-                        .on('finish', () => resolve(uploadStream));
-                });
-            });
-
-            const uploadStreams = await Promise.all(uploadPromises);
-            const urls = uploadStreams.map(us =>
-                `https://isimg-pre-back.vercel.app/api/inspect/${us.id}`
+            uploads = await Promise.all(
+                req.files.map(file => uploadToB2(file.buffer, file.originalname, file.mimetype))
             );
+            const urls = uploads.map(u => u.url);
 
             const data = await GetData(urls, 4);
             res.status(200).send({ ai: data });
@@ -148,6 +113,8 @@ module.exports = (db, bucket) => {
         } catch (error) {
             console.error('Error:', error);
             res.status(500).json({ error: "Internal server error" });
+        } finally {
+            await cleanupUploads(uploads);
         }
     });
 
@@ -159,36 +126,27 @@ module.exports = (db, bucket) => {
         }
 
         const sem = req.query.sem;
+        let uploadResult = null;
 
         try {
-            const readableStream = new Readable();
-            readableStream.push(req.file.buffer);
-            readableStream.push(null);
+            uploadResult = await uploadToB2(req.file.buffer, req.file.originalname, req.file.mimetype);
 
-            const uploadStream = bucket.openUploadStream(req.file.originalname);
-
-            readableStream.pipe(uploadStream)
-                .on('error', (error) => {
-                    console.error('Error uploading file:', error);
-                    return res.status(500).send("File upload failed");
-                })
-                .on('finish', async() => {
-                    const url = `https://isimg-pre-back.vercel.app/api/inspect/${uploadStream.id}`;
-                    const response = await fetch(`https://isimg-python.vercel.app/extract?url=${encodeURIComponent(url)}&sem=${sem}`);
-                    // const response = await fetch(`http://127.0.0.1:2000/extract?url=${encodeURIComponent(url)}&sem=${sem}`);
-                    const data = await response.json();                    
-                    res.status(200).send({pdf : JSON.stringify(data)});
-                });
+            const response = await fetch(`https://isimg-python.vercel.app/extract?url=${encodeURIComponent(uploadResult.url)}&sem=${sem}`);
+            // const response = await fetch(`http://127.0.0.1:2000/extract?url=${encodeURIComponent(uploadResult.url)}&sem=${sem}`);
+            const data = await response.json();
+            res.status(200).send({pdf : JSON.stringify(data)});
 
         } catch (error) {
             console.error('Error during file upload:', error);
             res.status(500).send("Error during file upload");
+        } finally {
+            await cleanupUploads(uploadResult ? [uploadResult] : []);
         }
     });
 
     //lsim 2
     router.post("/data/pdf/lsim2", upload.single('file'), async (req, res) =>{
-        
+
         if (!req.file) {
             return res.status(400).send("No file uploaded");
         }
@@ -196,29 +154,21 @@ module.exports = (db, bucket) => {
 
         const sem = req.query.sem;
         console.log(sem)
+        let uploadResult = null;
+
         try {
-            const readableStream = new Readable();
-            readableStream.push(req.file.buffer);
-            readableStream.push(null);
+            uploadResult = await uploadToB2(req.file.buffer, req.file.originalname, req.file.mimetype);
 
-            const uploadStream = bucket.openUploadStream(req.file.originalname);
-
-            readableStream.pipe(uploadStream)
-                .on('error', (error) => {
-                    console.error('Error uploading file:', error);
-                    return res.status(500).send("File upload failed");
-                })
-                .on('finish', async() => {
-                    const url = `https://isimg-pre-back.vercel.app/api/inspect/${uploadStream.id}`;
-                    const response = await fetch(`https://isimg-python.vercel.app/extract/lsim2?url=${encodeURIComponent(url)}&sem=${sem}`);
-                    //const response = await fetch(`http://127.0.0.1:2000/extract/lsim2?url=${encodeURIComponent(url)}&sem=${sem}`);
-                    const data = await response.json();
-                    res.status(200).send({pdf : JSON.stringify(data)});
-                });
+            const response = await fetch(`https://isimg-python.vercel.app/extract/lsim2?url=${encodeURIComponent(uploadResult.url)}&sem=${sem}`);
+            //const response = await fetch(`http://127.0.0.1:2000/extract/lsim2?url=${encodeURIComponent(uploadResult.url)}&sem=${sem}`);
+            const data = await response.json();
+            res.status(200).send({pdf : JSON.stringify(data)});
 
         } catch (error) {
             console.error('Error during file upload:', error);
             res.status(500).send("Error during file upload");
+        } finally {
+            await cleanupUploads(uploadResult ? [uploadResult] : []);
         }
     });
 
@@ -227,164 +177,51 @@ module.exports = (db, bucket) => {
 
         res.header('Access-Control-Allow-Origin', req.headers.origin);
         res.header('Access-Control-Allow-Credentials', 'true');
-        
+
         if (!req.file) {
             return res.status(400).send("No file uploaded");
         }
 
-        try {            
-            const readableStream = new Readable();
-            readableStream.push(req.file.buffer);
-            readableStream.push(null);
+        let uploadResult = null;
 
-            const uploadStream = bucket.openUploadStream(req.file.originalname);
+        try {
+            uploadResult = await uploadToB2(req.file.buffer, req.file.originalname, req.file.mimetype);
 
-            readableStream.pipe(uploadStream)
-                .on('error', (error) => {
-                    console.error('Error uploading file:', error);
-                    if (!res.headersSent) {
-                        return res.status(500).send("File upload failed");
-                    }
-                })
-                .on('finish', async() => {
-                    try {
-                        const url = `https://isimg-pre-back.onrender.com/api/inspect/${uploadStream.id}`;
-                        const response = await fetch('https://isimg-dynamic.onrender.com/extract', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Connection': 'keep-alive',
-                            },
-                            body: JSON.stringify({ pdf_url: url }),
-                            keepalive: true,
-                        });
+            const response = await fetch('https://isimg-dynamic.onrender.com/extract', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Connection': 'keep-alive',
+                },
+                body: JSON.stringify({ pdf_url: uploadResult.url }),
+                keepalive: true,
+            });
 
-                        const data = await response.json();
-                        
-                        if (!res.headersSent) {
-                            res.status(200).json({ pdf: JSON.stringify(data) });
-                        }
-                    } catch (fetchError) {
-                        console.error('Error fetching data:', fetchError);
-                        if (!res.headersSent) {
-                            res.status(500).send("Error processing PDF");
-                        }
-                    }
-                });
+            const data = await response.json();
+
+            if (!res.headersSent) {
+                res.status(200).json({ pdf: JSON.stringify(data) });
+            }
 
         } catch (error) {
             console.error('Error during file upload:', error);
             if (!res.headersSent) {
                 res.status(500).send("Error during file upload");
             }
-        }
-    });
-
-    router.get('/inspect/:id', async (req, res) => {
-        try {
-            const fileId = req.params.id;
-            
-            if (!ObjectId.isValid(fileId)) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Invalid file ID format'
-                });
-            }
-    
-            const objectID = new ObjectId(fileId);
-            
-            const files = await bucket.find({ _id: objectID }).toArray();
-            if (files.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    error: 'File not found'
-                });
-            }
-    
-            const fileMetadata = files[0];
-            
-            res.set({
-                'Content-Type': fileMetadata.contentType || 'application/octet-stream',
-                'Content-Length': fileMetadata.length,
-                'Content-Disposition': `inline; filename="${fileMetadata.filename}"`,                
-            });
-    
-            const downloadStream = bucket.openDownloadStream(objectID);
-    
-            if (req.headers.range) {
-                const range = req.headers.range;
-                const parts = range.replace(/bytes=/, "").split("-");
-                const start = parseInt(parts[0], 10);
-                const end = parts[1] ? parseInt(parts[1], 10) : fileMetadata.length - 1;
-    
-                if (start >= fileMetadata.length) {
-                    return res.status(416).json({
-                        success: false,
-                        error: 'Requested range not satisfiable'
-                    });
-                }
-    
-                res.status(206).set({
-                    'Content-Range': `bytes ${start}-${end}/${fileMetadata.length}`,
-                    'Accept-Ranges': 'bytes',
-                    'Content-Length': end - start + 1
-                });
-    
-                downloadStream.start(start);
-                downloadStream.end(end);
-            }
-    
-            downloadStream
-                .on('error', (err) => {
-                    console.error('Stream error:', err);
-                    if (!res.headersSent) {
-                        res.status(500).json({
-                            success: false,
-                            error: 'Error streaming file'
-                        });
-                    }
-                })
-                .pipe(res);
-    
-            req.on('close', () => {
-                downloadStream.destroy();
-            });
-    
-        } catch (error) {
-            console.error('Error in /inspect:', error);
-            res.status(500).json({
-                success: false,
-                error: error.message
-            });
-        }
-    });
-
-    router.get('/download/:id', async (req, res) => {
-        try {
-            const fileId = req.params.id;
-            const objectID = new ObjectId(fileId);
-            const downloadStream = bucket.openDownloadStream(objectID);
-
-            downloadStream.on('data', (chunk) => {
-                res.write(chunk);
-            });
-
-            downloadStream.on('end', () => {
-                res.end();
-            });
-
-            downloadStream.on('error', (err) => {
-                console.error('Error downloading file:', err);
-                res.status(404).send('File not found.');
-            });
-
-        } catch (error) {
-            console.error('Error downloading file:', error);
-            res.status(500).send('Error downloading file.');
+        } finally {
+            await cleanupUploads(uploadResult ? [uploadResult] : []);
         }
     });
 
     return router;
+}
+
+async function cleanupUploads(uploads) {
+    await Promise.all(uploads.map(u =>
+        deleteFromB2(u.fileId, u.key).catch(err =>
+            console.error(`Failed to delete B2 file ${u.key}:`, err)
+        )
+    ));
 }
 
 async function GetData(urls, sem) {
@@ -397,7 +234,6 @@ async function GetData(urls, sem) {
             systemInstruction
         });
 
-        // Fetch each image and convert to inline base64 for Gemini
         const imageParts = await Promise.all(urls.map(async (url) => {
             const response = await fetch(url);
             const arrayBuffer = await response.arrayBuffer();

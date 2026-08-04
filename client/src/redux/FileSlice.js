@@ -2,8 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
 
 
-const URL = "https://isimg-pre-back.onrender.com/api/data"
-// const URL = `https://isimg-pre-back.vercel.app/api/data`
+// const URL = "https://isimg-pre-back.onrender.com/api/data"
+const URL = `https://isimg-pre-back.vercel.app/api/data`
 // const LocalURL = 'http://localhost:5000/api/data'
 
 axios.defaults.withCredentials = false;
@@ -94,7 +94,7 @@ export const getData_lsim2_2 = createAsyncThunk('data/lsim2/sem2', async ({formD
 
 export const getDataPdfAny = createAsyncThunk('data/pdfany', async ({formData}, { rejectWithValue }) => {
   try {
-    const result = await axios.post(`https://isimg-pre-back.onrender.com/api/data/pdf/any`, formData, {
+    const result = await axios.post(`https://isimg-pre-back.vercel.app/api/data/pdf/any`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

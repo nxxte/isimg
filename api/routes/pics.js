@@ -17,12 +17,6 @@ const BACK = process.env.BACK;
 
 module.exports = () => {
 
-    router.use((req, res, next) => {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Range');
-        next();
-    });
-
     router.post('/data', upload.array('files'), async (req, res) => {
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ error: "No files uploaded" });
@@ -174,9 +168,6 @@ module.exports = () => {
 
     //any
     router.post("/data/pdf/any", upload.single('file'), async (req, res) => {
-
-        res.header('Access-Control-Allow-Origin', req.headers.origin);
-        res.header('Access-Control-Allow-Credentials', 'true');
 
         if (!req.file) {
             return res.status(400).send("No file uploaded");

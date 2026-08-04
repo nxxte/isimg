@@ -26,7 +26,7 @@ async function ensureReady() {
 async function uploadToB2(buffer, filename, contentType) {
     await ensureReady();
 
-    const key = `${crypto.randomUUID()}-${filename}`;
+    const key = `isimg/${crypto.randomUUID()}-${filename}`;
     const { data: uploadUrlData } = await b2.getUploadUrl({ bucketId });
 
     const { data } = await b2.uploadFile({

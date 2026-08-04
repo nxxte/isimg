@@ -182,22 +182,8 @@ module.exports = () => {
             return res.status(400).send("No file uploaded");
         }
 
-        let uploadResult = null;
-
         try {
-            uploadResult = await uploadToB2(req.file.buffer, req.file.originalname, req.file.mimetype);
-
-            const response = await fetch('https://isimg-dynamic.onrender.com/extract', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Connection': 'keep-alive',
-                },
-                body: JSON.stringify({ pdf_url: uploadResult.url }),
-                keepalive: true,
-            });
-
-            const data = await response.json();
+            const data = await GetPdfDataAny(req.file.buffer, req.file.mimetype || 'application/pdf');
 
             if (!res.headersSent) {
                 res.status(200).json({ pdf: JSON.stringify(data) });
@@ -208,8 +194,6 @@ module.exports = () => {
             if (!res.headersSent) {
                 res.status(500).send("Error during file upload");
             }
-        } finally {
-            await cleanupUploads(uploadResult ? [uploadResult] : []);
         }
     });
 
@@ -259,7 +243,7 @@ async function GetData(urls, sem) {
 }
 
 
-async function GetPdfDataAny(pdfText) {
+async function GetPdfDataAny(pdfBuffer, mimeType) {
     const systemInstruction = `You are a precise data extraction assistant. Extract academic subject information from the provided PDF text and return it in a clean JSON format.
 
 IMPORTANT RULES:
@@ -310,7 +294,7 @@ Expected JSON structure:
 
     const result = await model.generateContent([
         { text: 'Extract the subjects based on their semester from this PDF' },
-        { text: pdfText }
+        { inlineData: { data: pdfBuffer.toString('base64'), mimeType } }
     ]);
 
     const aiResponse = result.response.text();

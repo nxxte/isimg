@@ -276,25 +276,25 @@ const DynamicClass = () => {
                     </button> 
                 </div>
 
-                <PdfFileUpload 
-                    isOpen={isOpenPdf}
-                    onClose={() => setIsOpenPdf(false)}
-                    sem={activeSemester === "sem1" ? 1 : 2}
-                    section={"any"}
-                />
-                <PdfInfoModal 
-                    isOpen={showPdfInfo} 
-                    onClose={() => setShowPdfInfo(false)}          
-                />
-
                 {error && (
                     <div className="error-banner">
                         ⚠️ Error: {error}
                         <button onClick={() => setError(null)}>Dismiss</button>
                     </div>
                 )}
-                
+
             </header>
+
+            <PdfFileUpload
+                isOpen={isOpenPdf}
+                onClose={() => setIsOpenPdf(false)}
+                sem={activeSemester === "sem1" ? 1 : 2}
+                section={"any"}
+            />
+            <PdfInfoModal
+                isOpen={showPdfInfo}
+                onClose={() => setShowPdfInfo(false)}
+            />
 
             {dynamicData ? (
                 <>

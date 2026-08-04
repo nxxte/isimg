@@ -8,7 +8,7 @@ const fileRoutes = require('./routes/pics');
 const app = express();
 
 const corsOptions = {
-    origin: ["https://isimg.vercel.app", "https://isimg-preview.vercel.app", "https://localhost:3000"],
+    origin: ["*"],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Range']

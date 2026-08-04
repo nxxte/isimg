@@ -177,7 +177,7 @@ module.exports = () => {
             const data = await GetPdfDataAny(req.file.buffer, req.file.mimetype || 'application/pdf');
 
             if (!res.headersSent) {
-                res.status(200).json({ pdf: JSON.stringify(data) });
+                res.status(200).json({ pdf: data });
             }
 
         } catch (error) {

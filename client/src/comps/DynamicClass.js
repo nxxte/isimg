@@ -75,37 +75,25 @@ const FeedbackButton = ({ phoneNumber, defaultMessage }) => {
 };
 
 
-const calculateSubjectAvg = (subject) => {
-  const { notet, coeff } = subject;
-  
-  if (!notet || !coeff) return 0;
+const calculateSubjectAvg = (notes) => {
+  if (!notes || notes.length === 0) return 0;
 
-  let totalWeightedGrade = 0;
-  let totalCoefficient = 0;
+  const totalWeightedGrade = notes.reduce((acc, note) => {
+    return acc + (note.note * note.cs);
+  }, 0);
 
-  for (const key in notet) {
-
-    if (notet[key] !== null && coeff[key] !== null) {
-      const grade = notet[key];
-      const weight = coeff[key];
-      
-      totalWeightedGrade += grade * weight;
-      totalCoefficient += weight;
-    }
-  }
-
-  return totalCoefficient > 0.0001 ? totalWeightedGrade / totalCoefficient : 0;
+  return totalWeightedGrade;
 };
 
 const calculateSemesterAvg = (subjects) => {
     if (!subjects || subjects.length === 0) return 0;
 
     const totalWeightedAvg = subjects.reduce((acc, subject) => {
-        const subjectAvg = calculateSubjectAvg(subject);
-        return acc + (subjectAvg * subject.coef); 
+        const subjectAvg = calculateSubjectAvg(subject.notes);
+        return acc + (subjectAvg * subject.coeff);
     }, 0);
 
-    const totalCoefficient = subjects.reduce((acc, subject) => acc + subject.coef, 0);
+    const totalCoefficient = subjects.reduce((acc, subject) => acc + subject.coeff, 0);
 
     return totalCoefficient > 0 ? totalWeightedAvg / totalCoefficient : 0;
 };
@@ -160,27 +148,27 @@ const DynamicClass = () => {
         }
     }, [dynamicData]);
 
-    const handleChange = useCallback((semesterKey, subjectIndex, noteKey, value) => {
+    const handleChange = useCallback((semesterKey, subjectIndex, noteIndex, value) => {
         const gradeValue = parseFloat(value) || 0;
-        
+
         setDynamicData(prevData => {
             if (!prevData) return prevData;
 
             const newSubjects = [...prevData[semesterKey]];
-            if (newSubjects[subjectIndex] && newSubjects[subjectIndex].notet) {
-                
-                const clampedValue = Math.min(Math.max(gradeValue, 0), 20); 
+            if (newSubjects[subjectIndex] && newSubjects[subjectIndex].notes[noteIndex]) {
+                const clampedValue = Math.min(Math.max(gradeValue, 0), 20);
 
-                const newNotet = { 
-                    ...newSubjects[subjectIndex].notet, 
-                    [noteKey]: clampedValue 
+                const newNotes = [...newSubjects[subjectIndex].notes];
+                newNotes[noteIndex] = {
+                    ...newNotes[noteIndex],
+                    note: clampedValue
                 };
 
                 newSubjects[subjectIndex] = {
                     ...newSubjects[subjectIndex],
-                    notet: newNotet
+                    notes: newNotes
                 };
-                
+
                 return { ...prevData, [semesterKey]: newSubjects };
             }
             return prevData;
@@ -208,34 +196,27 @@ const DynamicClass = () => {
     const currentSemesterSubjects = activeSemester === 'sem1' ? sem1Subjects : sem2Subjects;
     const currentSemesterOverall = activeSemester === 'sem1' ? sem1Overall : sem2Overall;
 
-    const possibleNoteKeys = ['ds', 'ds2', 'tp', 'ex', 'oral'];
-
     const renderSubjectFields = (subject, subjectIndex) => {
-        const subjectAvg = calculateSubjectAvg(subject);
+        const subjectAvg = calculateSubjectAvg(subject.notes);
         const semesterKey = activeSemester;
-        
+
         return (
-            <fieldset key={subject.name + subjectIndex}>
-                <legend>{subject.name}</legend>
+            <fieldset key={subject.matiere + subjectIndex}>
+                <legend>{subject.matiere}</legend>
                 <div className='section-overall'>Moyen : <b style={{ color: subjectAvg < 10 ? 'red' : 'green' }}>{format(subjectAvg)}</b></div>
                 <fieldset>
-                    {possibleNoteKeys.map(key => {
-                        if (subject.notet[key] !== null && subject.coeff[key] !== null) {
-                            return (
-                                <p key={`${subject.name}-${key}`}>
-                                    {key.toUpperCase()} <input 
-                                        type="number" 
-                                        min="0" 
-                                        max="20" 
-                                        step="0.25" 
-                                        value={subject.notet[key]} 
-                                        onChange={(e) => handleChange(semesterKey, subjectIndex, key, e.target.value)} 
-                                    />
-                                </p>
-                            );
-                        }
-                        return null;
-                    })}
+                    {subject.notes.map((note, noteIndex) => (
+                        <p key={`${subject.matiere}-${note.type}`}>
+                            {note.type.toUpperCase()} <input
+                                type="number"
+                                min="0"
+                                max="20"
+                                step="0.25"
+                                value={note.note}
+                                onChange={(e) => handleChange(semesterKey, subjectIndex, noteIndex, e.target.value)}
+                            />
+                        </p>
+                    ))}
                 </fieldset>
             </fieldset>
         );

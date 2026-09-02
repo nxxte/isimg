@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "isimg-flutter-web-preview",
+      "runtimeExecutable": "D:\\Projects\\isimg\\run_flutter_web_preview.cmd",
+      "runtimeArgs": [],
+      "port": 8734
+    }
+  ]
+}

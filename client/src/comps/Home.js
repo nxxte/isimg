@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom"
 import Silk from "./Backgrounds/Silk"
 import Credits from "./Credits"
 import PrismaticBurst from "./Backgrounds/PrismaticBurst"
+import AppPromo from "./AppPromo"
+import AppBanner from "./AppBanner"
 
 function Home() {
   const navigate = useNavigate()
@@ -40,6 +42,8 @@ function Home() {
             rotation={0}
         />
       </div>
+
+      <AppBanner />
 
       <div className="container-home">
         <div className="content">
@@ -94,6 +98,8 @@ function Home() {
           <Credits />
         </div>
       </div>
+
+      <AppPromo />
     </div>
   )
 }

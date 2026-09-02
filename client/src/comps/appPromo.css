@@ -1,0 +1,997 @@
+/* --------------------------------------------------------------------------
+   ISIMG Student — Google Play promo section
+   Reuses the site palette (--primary #6c5ce7) declared in home.css.
+   -------------------------------------------------------------------------- */
+
+.promo {
+  --promo-line: rgba(255, 255, 255, 0.07);
+  --promo-line-strong: rgba(140, 127, 247, 0.28);
+  --promo-ink: #ffffff;
+  --promo-ink-dim: #a0a0b8;
+  --promo-green: #2ecc71;
+
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1040px;
+  margin: 2.5rem auto 0;
+  padding: 2.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--promo-line);
+  background: linear-gradient(
+      160deg,
+      rgba(108, 92, 231, 0.14),
+      rgba(18, 18, 24, 0) 55%
+    ),
+    #121218;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+/* Slow-drifting glow behind the card. */
+.promo-aurora {
+  position: absolute;
+  top: -35%;
+  right: -15%;
+  width: 620px;
+  height: 620px;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(108, 92, 231, 0.4),
+    rgba(108, 92, 231, 0) 65%
+  );
+  filter: blur(30px);
+  animation: promoAurora 14s ease-in-out infinite alternate;
+}
+
+@keyframes promoAurora {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.75;
+  }
+  to {
+    transform: translate3d(-70px, 60px, 0) scale(1.15);
+    opacity: 1;
+  }
+}
+
+.promo-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 3rem;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------- copy side */
+
+.promo-copy {
+  min-width: 0;
+}
+
+.promo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--promo-line-strong);
+  background: rgba(108, 92, 231, 0.1);
+  color: #c4b8ff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.promo-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--promo-green);
+  animation: promoPing 2.4s ease-out infinite;
+}
+
+@keyframes promoPing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px rgba(46, 204, 113, 0);
+  }
+}
+
+.promo-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+/* Halo behind the app logo. */
+.promo-logo-wrap {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  animation: promoFloat 6s ease-in-out infinite;
+}
+
+.promo-logo-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(108, 92, 231, 0.55),
+    rgba(108, 92, 231, 0) 70%
+  );
+  filter: blur(10px);
+  animation: promoHalo 4.5s ease-in-out infinite;
+}
+
+@keyframes promoHalo {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+.promo-logo {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+@keyframes promoFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.promo-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.promo-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #c4b8ff 25%,
+    #8c7ff7 50%,
+    #c4b8ff 75%,
+    #ffffff 100%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: promoShimmer 6s linear infinite;
+}
+
+@keyframes promoShimmer {
+  from {
+    background-position: -200% center;
+  }
+  to {
+    background-position: 200% center;
+  }
+}
+
+.promo-tagline {
+  font-size: 0.78rem;
+  color: var(--promo-ink-dim);
+}
+
+/* lsim1.css ships an unscoped `p { display: flex; gap: .5rem; margin: .8rem 0 }`
+   that CRA bundles globally, so these paragraphs must restate the basics. */
+.promo-lead,
+.promo-note {
+  display: block;
+  gap: normal;
+}
+
+.promo-lead {
+  margin: 1.1rem 0 0;
+  max-width: 48ch;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #d5d5e4;
+}
+
+.promo-lead strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.promo-features {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  margin-top: 1.75rem;
+}
+
+.promo-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.promo-feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--promo-line-strong);
+  background: rgba(108, 92, 231, 0.12);
+  color: #a996ff;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.promo-feature:hover .promo-feature-icon {
+  background: rgba(108, 92, 231, 0.25);
+  color: #d8d0ff;
+}
+
+/* The headline feature gets the green accent. */
+.promo-feature:first-child .promo-feature-icon {
+  border-color: rgba(46, 204, 113, 0.35);
+  background: rgba(46, 204, 113, 0.12);
+  color: #5fe0a0;
+}
+
+.promo-feature:first-child:hover .promo-feature-icon {
+  background: rgba(46, 204, 113, 0.22);
+  color: #8fefc0;
+}
+
+.promo-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.promo-feature-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--promo-ink);
+}
+
+.promo-feature-desc {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--promo-ink-dim);
+}
+
+/* ---------------------------------------------------------------------- CTA */
+
+.promo-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 2rem;
+  padding: 0.8rem 1.6rem;
+  min-height: 56px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, #6c5ce7, #4d3fc0);
+  color: #ffffff;
+  text-decoration: none;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(108, 92, 231, 0.35);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.promo-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 -60%;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  transform: skewX(-18deg);
+  animation: promoSheen 3.6s ease-in-out infinite;
+}
+
+@keyframes promoSheen {
+  0%,
+  55% {
+    transform: translateX(0) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(420%) skewX(-18deg);
+  }
+}
+
+.promo-cta:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.08);
+  box-shadow: 0 18px 40px rgba(108, 92, 231, 0.5);
+}
+
+.promo-cta:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.promo-cta-icon,
+.promo-cta-text {
+  position: relative;
+  z-index: 1;
+}
+
+.promo-cta-icon {
+  display: flex;
+  align-items: center;
+}
+
+.promo-cta-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.promo-cta-kicker {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.promo-cta-label {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.promo-cta:focus-visible {
+  outline: 2px solid #c4b8ff;
+  outline-offset: 3px;
+}
+
+.promo-note {
+  margin: 1rem 0 0;
+  font-size: 0.75rem;
+  color: var(--promo-ink-dim);
+}
+
+/* ------------------------------------------------- moyenne showcase card */
+
+.promo-showcase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.promo-calc {
+  width: 100%;
+  max-width: 340px;
+  padding: 1.5rem;
+  border-radius: 18px;
+  border: 1px solid var(--promo-line-strong);
+  background: linear-gradient(
+      165deg,
+      rgba(108, 92, 231, 0.16),
+      rgba(10, 10, 14, 0) 60%
+    ),
+    rgba(10, 10, 14, 0.72);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: promoFloat 7s ease-in-out infinite;
+}
+
+.promo-calc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.promo-calc-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--promo-ink-dim);
+}
+
+.promo-calc-chip {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(46, 204, 113, 0.35);
+  background: rgba(46, 204, 113, 0.12);
+  color: #5fe0a0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.promo-calc-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.promo-calc-number {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #5fe0a0;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 28px rgba(46, 204, 113, 0.35);
+}
+
+.promo-calc-scale {
+  font-size: 0.9rem;
+  color: var(--promo-ink-dim);
+}
+
+.promo-calc-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+  font-size: 0.76rem;
+  color: var(--promo-ink-dim);
+}
+
+.promo-calc-meta b {
+  color: var(--promo-ink);
+  font-weight: 600;
+}
+
+.promo-calc-sep {
+  width: 1px;
+  height: 12px;
+  background: var(--promo-line);
+}
+
+.promo-calc-units {
+  list-style: none;
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.promo-unit-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.promo-unit-name {
+  font-size: 0.75rem;
+  color: #cfcfe0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.promo-unit-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.promo-unit-track {
+  display: block;
+  height: 5px;
+  margin-top: 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.promo-unit-bar {
+  display: block;
+  width: var(--fill);
+  height: 100%;
+  border-radius: inherit;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.promo.is-visible .promo-unit-bar {
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(0.5s + var(--i) * 0.14s);
+  transform: scaleX(1);
+}
+
+/* Provenance colours, mirroring the app. */
+.promo-unit.is-official .promo-unit-value {
+  color: #5fe0a0;
+}
+.promo-unit.is-official .promo-unit-bar {
+  background: linear-gradient(90deg, #2ecc71, #5fe0a0);
+}
+
+.promo-unit.is-computed .promo-unit-value {
+  color: #f0a95f;
+}
+.promo-unit.is-computed .promo-unit-bar {
+  background: linear-gradient(90deg, #e08c3c, #f0a95f);
+}
+
+.promo-unit.is-simulated .promo-unit-value {
+  color: #a996ff;
+}
+.promo-unit.is-simulated .promo-unit-bar {
+  background: linear-gradient(90deg, #6c5ce7, #a996ff);
+}
+
+.promo-calc-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 1.25rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--promo-line);
+  font-size: 0.66rem;
+  color: var(--promo-ink-dim);
+}
+
+.promo-key {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.promo-key:not(:first-child) {
+  margin-left: 0.6rem;
+}
+
+.promo-key--official {
+  background: #2ecc71;
+}
+.promo-key--computed {
+  background: #e08c3c;
+}
+.promo-key--simulated {
+  background: #6c5ce7;
+}
+
+.promo-showcase-cap {
+  font-size: 0.68rem;
+  color: var(--promo-ink-dim);
+  opacity: 0.75;
+}
+
+/* --------------------------------------------------------- scroll reveal */
+
+.promo,
+.promo-badge,
+.promo-head,
+.promo-lead,
+.promo-feature,
+.promo-cta,
+.promo-note,
+.promo-showcase {
+  opacity: 0;
+}
+
+.promo {
+  transform: translateY(36px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.promo.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.promo.is-visible .promo-badge,
+.promo.is-visible .promo-head,
+.promo.is-visible .promo-lead,
+.promo.is-visible .promo-feature,
+.promo.is-visible .promo-cta,
+.promo.is-visible .promo-note,
+.promo.is-visible .promo-showcase {
+  animation: promoRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.promo.is-visible .promo-badge {
+  animation-delay: 0.1s;
+}
+.promo.is-visible .promo-head {
+  animation-delay: 0.18s;
+}
+.promo.is-visible .promo-lead {
+  animation-delay: 0.26s;
+}
+.promo.is-visible .promo-feature {
+  animation-delay: calc(0.34s + var(--i) * 0.07s);
+}
+.promo.is-visible .promo-cta {
+  animation-delay: 0.8s;
+}
+.promo.is-visible .promo-note {
+  animation-delay: 0.88s;
+}
+.promo.is-visible .promo-showcase {
+  animation-delay: 0.24s;
+}
+
+@keyframes promoRise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------- responsive */
+
+@media (max-width: 900px) {
+  .promo {
+    padding: 2rem;
+  }
+
+  .promo-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .promo-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .promo-head {
+    justify-content: center;
+  }
+
+  .promo-lead {
+    max-width: 54ch;
+  }
+
+  .promo-features {
+    text-align: left;
+    width: 100%;
+    max-width: 620px;
+  }
+
+  /* The calculator carries the headline feature — show it first. */
+  .promo-showcase {
+    order: -1;
+  }
+
+  .promo-calc {
+    text-align: left;
+  }
+}
+
+@media (max-width: 560px) {
+  .promo {
+    margin-top: 1.5rem;
+    padding: 1.5rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .promo-title {
+    font-size: 1.6rem;
+  }
+
+  .promo-logo,
+  .promo-logo-wrap {
+    width: 60px;
+    height: 60px;
+  }
+
+  .promo-lead {
+    font-size: 0.92rem;
+  }
+
+  .promo-features {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem;
+  }
+
+  .promo-calc-number {
+    font-size: 2.5rem;
+  }
+
+  .promo-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ---------------------------------------------------- reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .promo,
+  .promo-aurora,
+  .promo-logo-wrap,
+  .promo-logo-wrap::before,
+  .promo-calc,
+  .promo-title,
+  .promo-badge-dot,
+  .promo-cta::before,
+  .promo.is-visible .promo-badge,
+  .promo.is-visible .promo-head,
+  .promo.is-visible .promo-lead,
+  .promo.is-visible .promo-feature,
+  .promo.is-visible .promo-cta,
+  .promo.is-visible .promo-note,
+  .promo.is-visible .promo-showcase {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Never leave content stuck at opacity 0 when animations are disabled. */
+  .promo,
+  .promo-badge,
+  .promo-head,
+  .promo-lead,
+  .promo-feature,
+  .promo-cta,
+  .promo-note,
+  .promo-showcase {
+    opacity: 1;
+    transform: none;
+  }
+
+  .promo-cta::before {
+    display: none;
+  }
+
+  .promo.is-visible .promo-unit-bar {
+    transition: none;
+    transform: scaleX(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Compact top banner (AppBanner)
+   -------------------------------------------------------------------------- */
+
+.appbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 3rem auto 1.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(140, 127, 247, 0.28);
+  background: linear-gradient(
+      120deg,
+      rgba(108, 92, 231, 0.22),
+      rgba(18, 18, 24, 0) 60%
+    ),
+    rgba(18, 18, 24, 0.92);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.25s ease, box-shadow 0.25s ease;
+  animation: appbarDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes appbarDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.appbar:hover {
+  transform: translateY(-2px);
+  border-color: rgba(140, 127, 247, 0.55);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.45),
+    0 0 24px rgba(108, 92, 231, 0.3);
+}
+
+.appbar:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.appbar:focus-visible {
+  outline: 2px solid #c4b8ff;
+  outline-offset: 3px;
+}
+
+/* Light sweep, on hover only — the bar sits above the fold on every visit. */
+.appbar-sheen {
+  position: absolute;
+  inset: 0 auto 0 -40%;
+  width: 35%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.14),
+    transparent
+  );
+  transform: skewX(-18deg) translateX(0);
+  transition: transform 0.7s ease;
+}
+
+.appbar:hover .appbar-sheen {
+  transform: skewX(-18deg) translateX(420%);
+}
+
+.appbar-logo {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.appbar-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.appbar-name {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.appbar-pill {
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(46, 204, 113, 0.35);
+  background: rgba(46, 204, 113, 0.12);
+  color: #5fe0a0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.appbar-sub {
+  font-size: 0.72rem;
+  color: #a0a0b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6c5ce7, #4d3fc0);
+  box-shadow: 0 6px 16px rgba(108, 92, 231, 0.35);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: filter 0.25s ease, box-shadow 0.25s ease;
+}
+
+.appbar:hover .appbar-btn {
+  filter: brightness(1.1);
+  box-shadow: 0 8px 22px rgba(108, 92, 231, 0.5);
+}
+
+@media (max-width: 480px) {
+  .appbar {
+    gap: 0.6rem;
+    margin: 1.75rem auto 1.25rem;
+    padding: 0.55rem 0.6rem;
+    border-radius: 12px;
+  }
+
+  .appbar-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+  }
+
+  .appbar-name {
+    font-size: 0.85rem;
+  }
+
+  /* Not enough room for the strapline next to the button. */
+  .appbar-sub {
+    display: none;
+  }
+
+  .appbar-btn {
+    padding: 0 0.8rem;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .appbar-pill {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appbar,
+  .appbar-sheen,
+  .appbar-btn {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .appbar {
+    opacity: 1;
+    transform: none;
+  }
+
+  .appbar-sheen {
+    display: none;
+  }
+}

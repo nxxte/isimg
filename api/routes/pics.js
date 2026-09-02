@@ -173,8 +173,12 @@ module.exports = () => {
             return res.status(400).send("No file uploaded");
         }
 
+        let uploadResult = null;
+
         try {
-            const data = await GetPdfDataAny(req.file.buffer, req.file.mimetype || 'application/pdf');
+            uploadResult = await uploadToB2(req.file.buffer, req.file.originalname, req.file.mimetype);
+
+            const data = await GetPdfDataAny(uploadResult.url);
 
             if (!res.headersSent) {
                 res.status(200).json({ pdf: data });
@@ -185,6 +189,8 @@ module.exports = () => {
             if (!res.headersSent) {
                 res.status(500).send("Error during file upload");
             }
+        } finally {
+            await cleanupUploads(uploadResult ? [uploadResult] : []);
         }
     });
 
@@ -234,7 +240,7 @@ async function GetData(urls, sem) {
 }
 
 
-async function GetPdfDataAny(pdfBuffer, mimeType) {
+async function GetPdfDataAny(pdfUrl) {
     const systemInstruction = `You are a precise data extraction assistant. Extract academic subject information from the provided PDF text and return it in a clean JSON format.
 
 IMPORTANT RULES:
@@ -283,9 +289,14 @@ Expected JSON structure:
         systemInstruction
     });
 
+    const response = await fetch(pdfUrl);
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+    const mimeType = response.headers.get('content-type') || 'application/pdf';
+
     const result = await model.generateContent([
         { text: 'Extract the subjects based on their semester from this PDF' },
-        { inlineData: { data: pdfBuffer.toString('base64'), mimeType } }
+        { inlineData: { data: base64, mimeType } }
     ]);
 
     const aiResponse = result.response.text();
